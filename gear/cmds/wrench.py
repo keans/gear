@@ -7,12 +7,48 @@ from gear.utils.config import CONFIG_DIRECTORY
 from gear.evaluator.evaluatorconfigmanager import EvaluatorConfigManager
 from gear.utils.utils import ensure_path, guess_filename
 from gear.utils.config import CONFIG_DIRECTORY
+from gear.utils.utils import get_classes
+from gear.filetypes.base.basereader import BaseReader
+
+reader_classes = get_classes("gear/filetypes/", BaseReader)
 
 
 @click.group()
 @click.option("--debug/--no-debug", default=False)
 def cli(debug):
-    click.echo(f"Debug mode is {'on' if debug else 'off'}")
+    pass
+    #click.echo(f"Debug mode is {'on' if debug else 'off'}")
+
+
+@cli.command()
+@click.option('--full/--no-full', default=False)
+def list(full):
+    """
+    list all existing configurations
+    """
+    ecm = EvaluatorConfigManager(CONFIG_DIRECTORY)
+    for conf in ecm.configurations:
+        if full is True:
+            # show full path
+            click.echo(conf)
+        else:
+            # show only filename without full path
+            click.echo(conf.name)
+
+
+@cli.command()
+@click.argument("name")
+def view(name):
+    try:
+        # ensure that filename is a Path
+        fn = guess_filename(name, CONFIG_DIRECTORY, ".yml")
+
+        ecm = EvaluatorConfigManager(CONFIG_DIRECTORY)
+        ec = ecm.load_config(fn)
+        print(ec.yaml)
+
+    except FileNotFoundError as e:
+        raise click.ClickException(e)
 
 
 @cli.command()
@@ -59,14 +95,36 @@ def create_config(name: str, description: str, author: str):
     except FileExistsError as e:
         raise click.ClickException(e)
 
+# TODO: general extractor iterate over files and plugins
 
 @cli.command()
-def test():
-    print("DA")
-    from gear.utils.utils import get_classes
-    from gear.filetypes.basefiletype import BaseFileType
+def test_csv():
+    d = {"delimiter": ";"}
+    with reader_classes["csvreader"](filename="test.csv", **d) as c:
+        for x in c:
+            print(x)
 
-    print(get_classes("gear/filetypes", BaseFileType))
+@cli.command()
+def test_xls():
+    d = {"delimiter": ";"}
+    with reader_classes["xlsreader"](filename="test.xlsx", **d) as c:
+        for x in c:
+            print(x)
+
+@cli.command()
+def test_json():
+    d = {"intent": 4}
+    with reader_classes["jsonreader"](filename="test.json", **d) as c:
+        for x in c:
+            print(x)
+
+
+@cli.command()
+def test_pcap():
+    #d = {"delimiter": ";"}
+    with reader_classes["pcapreader"](filename="test.pcapng") as c:
+        for x in c:
+            print(x)
 
 
 @cli.command()
@@ -82,4 +140,3 @@ def run(name):
 
     except FileNotFoundError as e:
         raise click.ClickException(e)
-

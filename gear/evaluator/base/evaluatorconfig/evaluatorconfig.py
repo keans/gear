@@ -5,7 +5,7 @@ from typing import Union
 import yaml
 
 from gear.utils.utils import ensure_path
-from gear.evaluator.cerberusutils.evaluatorconfigvalidator import \
+from gear.evaluator.base.evaluatorconfig.evaluatorconfigvalidator import \
     EvaluatorConfigValidator
 
 
@@ -47,6 +47,10 @@ class EvaluatorConfig:
         ec.load()
 
         return ec
+
+    @property
+    def yaml(self) -> str:
+        return yaml.safe_dump(self.dict, sort_keys=False)
 
     @property
     def dict(self) -> dict:

@@ -41,7 +41,8 @@ setup(
         exclude=["contrib", "docs", "tests"]
     ),
     install_requires=[
-        "pyyaml", "cerberus", "python-dotenv", "click"
+        "pyyaml", "cerberus", "python-dotenv", "click",
+        "pandas", "dpkt", "xlrd", "openpyxl"
     ],
     extra_require={
         "docs": ["mkdocs"],

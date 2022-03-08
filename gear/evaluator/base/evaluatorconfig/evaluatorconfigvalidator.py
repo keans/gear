@@ -2,7 +2,7 @@ import re
 
 from cerberus import Validator
 
-from gear.evaluator.cerberusutils.evaluatorconfigschema import \
+from gear.evaluator.base.evaluatorconfig.evaluatorconfigschema import \
     evaluator_config_schema
 
 
@@ -25,6 +25,8 @@ class EvaluatorConfigValidator(Validator):
         checks if value is a author value of the format
         Firstname Lastname <email@example.com>
         """
-        res = re.compile(r'^(?:"?([^"]*)"?\s)?(?:<?(.+@[^>]+)>?)$').match(value)
+        res = re.compile(
+            r'^(?:"?([^"]*)"?\s)?(?:<?(.+@[^>]+)>?)$'
+        ).match(value)
         if not res:
             self._error(field, f"Invalid author '{value}'!")

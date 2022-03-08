@@ -52,7 +52,7 @@ def ensure_path(
     return path
 
 
-def get_classes(directory: Union[str, Path], cls: Any) -> list:
+def get_classes(directory: Union[str, Path], cls: Any) -> dict:
     """
     get all subclasses of the class type in the given directory
 
@@ -61,7 +61,7 @@ def get_classes(directory: Union[str, Path], cls: Any) -> list:
     :param cls: class that is searched
     :type cls: Any
     :returns: list of subclasses found
-    :type: list
+    :type: dict
     """
     assert isinstance(directory, (str, Path))
 
@@ -83,7 +83,10 @@ def get_classes(directory: Union[str, Path], cls: Any) -> list:
         # load the module
         spec.loader.exec_module(module)
 
-    return cls.__subclasses__()
+    return {
+        c.__name__.lower(): c
+        for c in cls.__subclasses__()
+    }
 
 
 def guess_filename(

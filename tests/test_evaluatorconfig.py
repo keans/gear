@@ -4,7 +4,7 @@
 from tempfile import tempdir
 import pytest
 
-from gear.evaluator.models.evaluatorconfig import EvaluatorConfig
+from gear.evaluator.base.evaluatorconfig.evaluatorconfig import EvaluatorConfig
 
 config_content = """---
 name: Example Configuration
