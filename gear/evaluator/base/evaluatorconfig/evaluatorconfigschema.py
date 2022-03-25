@@ -7,7 +7,7 @@ evaluator_config_schema = {
     },
     "description": {
         "type": "string",
-        "required": True,
+        "required": True
     },
     "author": {
         "type": "string",
@@ -16,10 +16,27 @@ evaluator_config_schema = {
     },
     "creation_date": {
         "type": "datetime",
-        "required": True,
+        "required": True
     },
     "filetypes": {
-        "type": "dict",
-        "required": True,
-    }
+        "type": "list",
+        "schema": {
+            "type": "dict",
+            "schema": {
+                "filetype": {
+                    "type": "string",
+                    "check_with": "is_alphanumeric"
+                },
+                "kwargs": {
+                    "type": "dict"
+                },
+                "extractors": {
+                    "type": "list",
+                    "schema": {
+                        "type": "dict"
+                    }
+                }
+            }
+        }
+    },
 }

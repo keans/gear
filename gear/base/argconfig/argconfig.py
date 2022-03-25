@@ -1,4 +1,6 @@
-from typing import Any
+from typing import Any, Union
+
+from luigi.freezing import FrozenOrderedDict
 
 from gear.base.argconfig.argconfigvalidator import ArgConfigValidator
 
@@ -12,10 +14,10 @@ class ArgConfigException(Exception):
 class ArgConfig:
     def __init__(
         self,
-        argconfig_schema: dict,
-        d: dict
+        schema: dict,
+        d: Union[dict, FrozenOrderedDict] = {}
     ):
-        self.validator = ArgConfigValidator(argconfig_schema)
+        self.validator = ArgConfigValidator(schema)
         self.dict = d
 
     def __getitem__(self, key: str) -> Any:
@@ -47,18 +49,12 @@ class ArgConfig:
         :param value: dict
         :type value: dict
         """
-        assert (value is None) or isinstance(value, dict)
+        assert isinstance(value, (dict, FrozenOrderedDict))
 
-        if value is None:
-            # value set to None
-            self._dict = None
-
-        else:
-            # dict provided then validate it
-            self._dict = value
-            if not self.validator.validate(self._dict):
-                # invalid configuration arguments
-                raise ArgConfigException(self.validator.errors)
+        self._dict = value
+        if (value != {}) and not self.validator.validate(self._dict):
+            # non-empty dict provided and invalid configuration arguments
+            raise ArgConfigException(self.validator.errors)
 
     def __repr__(self) -> str:
         return (

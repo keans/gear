@@ -101,8 +101,8 @@ class EvaluatorConfigManager:
         )
         return ec.save()
 
+    @staticmethod
     def load_config(
-        self,
         filename: Union[str, Path]
     ) -> EvaluatorConfig:
         """

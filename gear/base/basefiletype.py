@@ -13,6 +13,9 @@ class BaseFileTypeException(Exception):
 
 
 class BaseFileType(abc.ABC):
+    """
+    base file type
+    """
     def __init__(
         self,
         argconfig_schema: dict,
@@ -27,9 +30,6 @@ class BaseFileType(abc.ABC):
         # prepare argument configuration validator
         self.argconfig = ArgConfig(argconfig_schema, kwargs)
 
-    """
-    base file type
-    """
     @property
     def filename(self) -> Path:
         """

@@ -1,16 +1,20 @@
+import sys
 import getpass
 import socket
 
 import click
+import luigi
+from powerstrip import PluginManager
 
-from gear.utils.config import CONFIG_DIRECTORY
+from gear.utils.config import CONFIG_DIRECTORY, PLUGIN_DIR
 from gear.evaluator.evaluatorconfigmanager import EvaluatorConfigManager
 from gear.utils.utils import ensure_path, guess_filename
 from gear.utils.config import CONFIG_DIRECTORY
 from gear.utils.utils import get_classes
-from gear.filetypes.base.basereader import BaseReader
+from gear.tasks.starttask import StartTask
 
-reader_classes = get_classes("gear/filetypes/", BaseReader)
+# add plugin directory to path
+sys.path.append(PLUGIN_DIR)
 
 
 @click.group()
@@ -43,8 +47,7 @@ def view(name):
         # ensure that filename is a Path
         fn = guess_filename(name, CONFIG_DIRECTORY, ".yml")
 
-        ecm = EvaluatorConfigManager(CONFIG_DIRECTORY)
-        ec = ecm.load_config(fn)
+        ec = EvaluatorConfigManager.load_config(fn)
         print(ec.yaml)
 
     except FileNotFoundError as e:
@@ -134,9 +137,28 @@ def run(name):
         # ensure that filename is a Path
         fn = guess_filename(name, CONFIG_DIRECTORY, ".yml")
 
-        ecm = EvaluatorConfigManager(CONFIG_DIRECTORY)
-        ec = ecm.load_config(fn)
-        print(ec)
+        src_directory = "."
+
+        # start task
+        luigi.build(
+            [StartTask(config_filename=fn, src_directory=src_directory)],
+            workers=1,
+            local_scheduler=True
+        )
 
     except FileNotFoundError as e:
         raise click.ClickException(e)
+
+
+@cli.command()
+@click.argument("directory")
+def pack(directory):
+    pm = PluginManager(PLUGIN_DIR, use_category=True)
+    pm.pack(directory)
+
+
+@cli.command()
+@click.argument("package")
+def install(package):
+    pm = PluginManager(PLUGIN_DIR, use_category=True)
+    pm.install(package)

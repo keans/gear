@@ -2,16 +2,8 @@ import re
 
 from cerberus import Validator
 
-from gear.evaluator.base.evaluatorconfig.evaluatorconfigschema import \
-    evaluator_config_schema
-
 
 class EvaluatorConfigValidator(Validator):
-    def __init__(self, *args, **kwargs):
-        Validator.__init__(
-            self, evaluator_config_schema, *args, **kwargs
-        )
-
     def _check_with_is_alphanumeric(self, field: str, value: str):
         """
         checks if value is a alphanumeric value or includes one of: _, -, .

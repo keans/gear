@@ -42,7 +42,8 @@ setup(
     ),
     install_requires=[
         "pyyaml", "cerberus", "python-dotenv", "click",
-        "pandas", "dpkt", "xlrd", "openpyxl"
+        "pandas", "dpkt", "xlrd", "openpyxl", "luigi",
+        "python-powerstrip"
     ],
     extra_require={
         "docs": ["mkdocs"],

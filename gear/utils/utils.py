@@ -1,13 +1,13 @@
 import sys
 import importlib
 from pathlib import Path
-from typing import Union, Any
+from typing import Any
 
-from gear.utils.config import CONFIG_DIRECTORY
+from gear.utils.typing import PathOrString
 
 
 def ensure_path(
-    path: Union[str, Path],
+    path: PathOrString,
     must_exist: bool = False,
     must_exist_dir: bool = False,
     create_dir: bool = False
@@ -16,7 +16,7 @@ def ensure_path(
     ensure that given path is of type Path
 
     :param path: path that is checked
-    :type path: Union[str, Path]
+    :type path: PathOrString
     :param must_exist: if True, path must exist otherwise exception is raised
     :type must_exist: bool, optional
     :param must_exist_dir: if True, path must be an existing directory
@@ -26,6 +26,8 @@ def ensure_path(
     :return: path
     :rtype: Path
     """
+    assert isinstance(path, (str, Path))
+
     # ensure path is of type Path
     path = (
         path
@@ -52,12 +54,12 @@ def ensure_path(
     return path
 
 
-def get_classes(directory: Union[str, Path], cls: Any) -> dict:
+def get_classes(directory: PathOrString, cls: Any) -> dict:
     """
     get all subclasses of the class type in the given directory
 
     :param directory: directory in which subclasses are searched
-    :type directory: Union[str, Path]
+    :type directory: PathOrString
     :param cls: class that is searched
     :type cls: Any
     :returns: list of subclasses found
@@ -90,8 +92,8 @@ def get_classes(directory: Union[str, Path], cls: Any) -> dict:
 
 
 def guess_filename(
-    name: Union[str, Path],
-    directories: Union[Path, list],
+    name: PathOrString,
+    directories: PathOrString,
     default_extension: str
 ) -> Path:
     """
@@ -99,9 +101,9 @@ def guess_filename(
     if not exist try to find it in one of the given directories
 
     :param name: name of the file
-    :type name: Union[str, Path]
+    :type name: PathOrString
     :param directories: directories that will be searched
-    :type directories: Union[str, list]
+    :type directories: PathOrString
     :param default_extension: default extension starting with '.'
     :type default_extension: str
     :return: Path of the filename found or None, if not existing

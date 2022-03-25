@@ -7,6 +7,8 @@ import yaml
 from gear.utils.utils import ensure_path
 from gear.evaluator.base.evaluatorconfig.evaluatorconfigvalidator import \
     EvaluatorConfigValidator
+from gear.evaluator.base.evaluatorconfig.evaluatorconfigschema import \
+    evaluator_config_schema
 
 
 class EvaluatorConfig:
@@ -26,10 +28,12 @@ class EvaluatorConfig:
         self.name = name
         self.description = description
         self.author = author
-        self.filetypes = {}
+        self.filetypes = []
 
         # prepare validator
-        self.validator = EvaluatorConfigValidator()
+        self.validator = EvaluatorConfigValidator(
+            schema=evaluator_config_schema
+        )
 
     @staticmethod
     def from_file(
@@ -59,7 +63,7 @@ class EvaluatorConfig:
             "description": self.description,
             "author": self.author,
             "creation_date": datetime.datetime.now(),
-            "filetypes": {},
+            "filetypes": [],
         }
 
         if not self.validator.validate(d):
@@ -95,6 +99,11 @@ class EvaluatorConfig:
         # load yaml file
         with self.filename.open("r") as f:
             d = yaml.safe_load(f)
+
+            # TODO: REMOVE
+            import pprint
+            pprint.pprint(d)
+
             if not self.validator.validate(d):
                 raise Exception(
                     f"{self.validator.errors}"

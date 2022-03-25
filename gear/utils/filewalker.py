@@ -5,6 +5,7 @@ from pathlib import Path
 
 from gear.utils.utils import ensure_path
 
+
 # prepare logger
 log = logging.getLogger(__name__)
 
@@ -16,10 +17,10 @@ class FileWalker:
     def __init__(
         self,
         directory: Union[str, Path],
-        extensions: list = ".*"
+        globs: list = ".*"
     ):
         self.directory = directory
-        self.extensions = extensions
+        self.globs = globs
 
     @property
     def directory(self) -> Path:
@@ -44,21 +45,21 @@ class FileWalker:
         self._path = ensure_path(value, must_exist_dir=True)
 
     @property
-    def extensions(self) -> list:
+    def globs(self) -> list:
         """
-        returns the extensions as list
+        returns the globs as list
 
-        :return: list of extensions
+        :return: list of globs
         :rtype: list
         """
-        return self._extensions
+        return self._globs
 
-    @extensions.setter
-    def extensions(self, value: Union[str, list]):
+    @globs.setter
+    def globs(self, value: Union[str, list]):
         """
-        set extensions
+        set globs
 
-        :param value: list of extensions
+        :param value: list of globs
         :type value: list
         """
         assert isinstance(value, (str, list))
@@ -71,15 +72,14 @@ class FileWalker:
                 if item != ""
             ]
 
-        self._extensions = []
+        self._globs = []
         for item in value:
-            assert item.startswith(".")
-            self._extensions.append(item)
+            self._globs.append(item)
 
     def walk(self, recursive: bool = False) -> Generator:
         """
         walk through directory and return all files that are
-        matching the extensions; if recursive is True, also all
+        matching the globs; if recursive is True, also all
         subdirectories will be considered
 
         :param recursive: if True, recursively visit subdirectories,
@@ -88,8 +88,8 @@ class FileWalker:
         :yield: generator of filenames found
         :rtype: Generator
         """
-        for ext in self.extensions:
-            glob = f"**/*{ext}" if recursive is True else f"*{ext}"
+        for g in self.globs:
+            glob = f"**/*{g}" if recursive is True else f"*{g}"
             log.debug(
                 f"getting files from '{self.directory.joinpath(glob)}'..."
             )
@@ -98,5 +98,5 @@ class FileWalker:
     def __repr__(self) -> str:
         return (
             f"<FileWalker(directory='{self.directory}', "
-            f"extensions={self.extensions})"
+            f"globs={self.globs})"
         )
