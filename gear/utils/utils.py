@@ -35,7 +35,7 @@ def ensure_path(
         Path(path)
     )
 
-    if must_exist and not path.exist():
+    if must_exist and not path.exists():
         # file does not exist
         raise FileNotFoundError(
             f"The file '{path}' does not exist!"

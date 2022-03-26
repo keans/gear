@@ -2,9 +2,9 @@
 from gear.base.pluginbase import PluginBase
 
 
-class ExtractorPlugin(PluginBase):
+class TransformerPlugin(PluginBase):
     """
-    extractor plugin
+    transformer plugin
     """
     def __init__(self, schema):
         PluginBase.__init__(self, schema)

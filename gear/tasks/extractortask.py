@@ -2,19 +2,12 @@ from pathlib import Path
 from typing import Any
 
 import luigi
-from luigi.util import requires
 
 from gear.utils.config import OUTPUT_DIR, PLUGIN_DIR
-from gear.base.filepluginmixin import FilePluginMixin
 from gear.base.basetask import BaseTask
 from gear.plugins.extractorplugin import ExtractorPlugin
 from gear.plugins.readerplugin import ReaderPlugin
-
-
-class ExtractorTaskException(Exception):
-    """
-    extractor task exception
-    """
+from gear.tasks.taskexceptions import ExtractorTaskException
 
 
 class ExtractorTask(BaseTask):
@@ -29,6 +22,7 @@ class ExtractorTask(BaseTask):
     def run(self):
         # get plugins
         plugins = self.plugins
+        print("444444444", plugins)
 
         # get reader for filetype and create initalize it
         reader = ReaderPlugin.get_plugin(
@@ -47,18 +41,11 @@ class ExtractorTask(BaseTask):
                 for plugin in plugins:
                     plugin.apply(no, row)
 
-        res = {}
-        for plugin in plugins:
-            name = plugin.metadata.name
-
-            i = 0
-            while True:
-                if name not in res:
-                    break
-                i += 1
-                name = f"{plugin.metadata.name}_{i}"
-
-            res[name] = plugin._res
+        # collect overall result from plugins' results
+        res = {
+            plugin.metadata.name: plugin._res
+            for plugin in plugins
+        }
 
         # dump plugin results
         self.dump(res)

@@ -19,8 +19,8 @@ evaluator_config_schema = {
         "required": True
     },
     "filetypes": {
-        "type": "list",
-        "schema": {
+        "type": "dict",
+        "valueschema": {
             "type": "dict",
             "schema": {
                 "filetype": {
@@ -35,8 +35,20 @@ evaluator_config_schema = {
                     "schema": {
                         "type": "dict"
                     }
+                },
+                "transformers": {
+                    "type": "list",
+                    "schema": {
+                        "type": "dict"
+                    }
+                },
+                "reporters": {
+                    "type": "list",
+                    "schema": {
+                        "type": "dict"
+                    }
                 }
             }
         }
-    },
+    }
 }

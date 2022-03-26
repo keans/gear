@@ -1,3 +1,4 @@
+from email.generator import Generator
 import hashlib
 import json
 from typing import Any
@@ -7,6 +8,8 @@ import luigi
 from gear.utils.parameters import PathParameter
 from gear.utils.config import OUTPUT_DIR, PLUGIN_DIR
 from gear.plugins.extractorplugin import ExtractorPlugin
+from gear.plugins.transformerplugin import TransformerPlugin
+from gear.plugins.reporterplugin import ReporterPlugin
 
 
 class BaseTaskException(Exception):
@@ -16,22 +19,38 @@ class BaseTaskException(Exception):
 
 
 class BaseTask(luigi.Task):
+    """
+    base task
+    """
     input_filename = PathParameter()
     config = luigi.parameter.DictParameter()
     output_suffix = luigi.Parameter(default=".json")
     plugin_section = luigi.parameter.Parameter(default=None)
 
     @property
-    def plugin_class(self):
-        if self.plugin_section == "extractors":
-            return ExtractorPlugin
+    def plugin_class(self) -> Any:
+        """
+        get all plugin classes based on internal plugin_section variable
 
-        else:
+        :raises NotImplementedError: raised, if no plugin class found
+        :return: plugin class
+        :rtype: Any
+        """
+        # get plugin class based on plugin section
+        plugin_cls = {
+            "extractors": ExtractorPlugin,
+            "transformers": TransformerPlugin,
+            "reporters": ReporterPlugin
+        }.get(self.plugin_section, None)
+
+        if plugin_cls is None:
             # undefined plugin section
             raise NotImplementedError(
                 f"No plugin class defined for plugin section "
                 f"'{self.plugin_section}'!"
             )
+
+        return plugin_cls
 
     @property
     def filetype(self) -> str:
@@ -58,27 +77,6 @@ class BaseTask(luigi.Task):
 
         return f"{self.__class__.__name__}_{h}{self.output_suffix}"
 
-    def output(self) -> Any:
-        """
-        returns the luigi output file as local target
-
-        :return: luigi output file as local target
-        :rtype: Any
-        """
-        return luigi.LocalTarget(
-            OUTPUT_DIR.joinpath(self.output_filename)
-        )
-
-    def dump(self, value: dict):
-        """
-        dump given dictionary to
-
-        :param value: dictionary with values to be stored
-        :type value: dict
-        """
-        with self.output().open("w") as f:
-            json.dump(value, f)
-
     @property
     def available_plugin_classes(self) -> list:
         """
@@ -102,7 +100,7 @@ class BaseTask(luigi.Task):
         """
         plugins = []
         for config in self.config.get(self.plugin_section, []):
-            for plugin_name in config:
+            for plugin_name, plugin_config in config.items():
                 if plugin_name not in self.available_plugin_classes:
                     # unknown extractor plugin in config, but not installed
                     raise BaseTaskException(
@@ -116,11 +114,39 @@ class BaseTask(luigi.Task):
 
                  # initialize plugin with given config
                 plugins[-1].init(
-                    **(config or {}).get("kwargs", {})
+                    **(plugin_config or {}).get("kwargs", {})
                 )
 
         return plugins
 
-    #def requires(self):
-    #    return []
+    def output(self) -> Any:
+        """
+        returns the luigi output file as local target
 
+        :return: luigi output file as local target
+        :rtype: Any
+        """
+        return luigi.LocalTarget(
+            OUTPUT_DIR.joinpath(self.output_filename)
+        )
+
+    def load(self) -> Generator:
+        """
+        load input files
+
+        :yield: file input
+        :rtype: Generator
+        """
+        for input_file in self.input():
+            with input_file.open("r") as f:
+                yield json.load(f)
+
+    def dump(self, value: dict):
+        """
+        dump given dictionary to
+
+        :param value: dictionary with values to be stored
+        :type value: dict
+        """
+        with self.output().open("w") as f:
+            json.dump(value, f)

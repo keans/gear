@@ -3,9 +3,11 @@ import luigi
 from gear.utils.config import PLUGIN_DIR
 from gear.evaluator.base.evaluatorconfig.evaluatorconfig import \
     EvaluatorConfig
-from gear.tasks.extractortask import ExtractorTask
 from gear.utils.filewalker import FileWalker
 from gear.plugins.readerplugin import ReaderPlugin
+from gear.tasks.extractortask import ExtractorTask
+from gear.tasks.transformertask import TransformerTask
+from gear.tasks.reportertask import ReporterTask
 
 
 class StartTask(luigi.WrapperTask):
@@ -16,38 +18,49 @@ class StartTask(luigi.WrapperTask):
         # load the configuration file
         ec = EvaluatorConfig.from_file(filename=self.config_filename)
 
-        # create dict of all readers by filetype to
-        # have quick access to the readers during file walk
+        # create dict of all readers by filetype to have quick
+        # access to the readers' regexes during file walk
+        # (no need for correct init with parameters here)
         readers = {
-            filetype["filetype"]: ReaderPlugin.get_plugin(
+            filetype_name: ReaderPlugin.get_plugin(
                 plugin_directory=PLUGIN_DIR,
                 tag=filetype["filetype"]
             )
-            for filetype in ec.filetypes
+            for filetype_name, filetype in ec.filetypes.items()
         }
 
-        # target list of required extractor tasks
-        extractor_tasks = []
+        # target list of required sub tasks
+        sub_tasks = []
 
         # prepare file walker for filetype
         fw = FileWalker(directory=self.src_directory)
         for filename in fw.walk(recursive=False):
-            for filetype in ec.filetypes:
+            for filetype_name, filetype in ec.filetypes.items():
                 # get config of filetype
                 config = filetype.get("kwargs", {})
 
                 # get reader for each filetype
-                reader = readers[filetype["filetype"]]
+                reader = readers[filetype_name]
                 if reader.match(
                     filename=filename,
                     regex=config.get("regex", None)
                 ):
                     # reader is matching the file type
                     # => start extractor task
-                    extractor_task = ExtractorTask(
+                    #task = ExtractorTask(
+                    #task = TransformerTask(
+                    task = ReporterTask(
                         input_filename=filename,
                         config=filetype
                     )
-                    extractor_tasks.append(extractor_task)
+                    sub_tasks.append(task)
 
-        return extractor_tasks
+        return sub_tasks
+
+    def run(self):
+        import json
+        for input_file in self.input():
+            with input_file.open("r") as f:
+                j = json.load(f)
+
+                print("222222", j)

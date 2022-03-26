@@ -102,6 +102,7 @@ class EvaluatorConfig:
 
             # TODO: REMOVE
             import pprint
+            print("CONFIG:")
             pprint.pprint(d)
 
             if not self.validator.validate(d):

@@ -1,6 +1,8 @@
+from cmath import log
 import sys
 import getpass
 import socket
+import logging
 
 import click
 import luigi
@@ -15,6 +17,9 @@ from gear.tasks.starttask import StartTask
 
 # add plugin directory to path
 sys.path.append(PLUGIN_DIR)
+
+# set logging level
+logging.basicConfig(level=logging.WARNING)
 
 
 @click.group()
@@ -98,37 +103,6 @@ def create_config(name: str, description: str, author: str):
     except FileExistsError as e:
         raise click.ClickException(e)
 
-# TODO: general extractor iterate over files and plugins
-
-@cli.command()
-def test_csv():
-    d = {"delimiter": ";"}
-    with reader_classes["csvreader"](filename="test.csv", **d) as c:
-        for x in c:
-            print(x)
-
-@cli.command()
-def test_xls():
-    d = {"delimiter": ";"}
-    with reader_classes["xlsreader"](filename="test.xlsx", **d) as c:
-        for x in c:
-            print(x)
-
-@cli.command()
-def test_json():
-    d = {"intent": 4}
-    with reader_classes["jsonreader"](filename="test.json", **d) as c:
-        for x in c:
-            print(x)
-
-
-@cli.command()
-def test_pcap():
-    #d = {"delimiter": ";"}
-    with reader_classes["pcapreader"](filename="test.pcapng") as c:
-        for x in c:
-            print(x)
-
 
 @cli.command()
 @click.argument("name")
@@ -143,7 +117,8 @@ def run(name):
         luigi.build(
             [StartTask(config_filename=fn, src_directory=src_directory)],
             workers=1,
-            local_scheduler=True
+            local_scheduler=True,
+            log_level=logging.getLevelName(logging.INFO)
         )
 
     except FileNotFoundError as e:

@@ -23,9 +23,9 @@ class ReaderPlugin(PluginBase, BaseFileType):
     """
     GLOBS = [".*"]
 
-    def __init__(self, schema):
+    def __init__(self, schema: dict, is_binary: bool = False):
         PluginBase.__init__(self, schema)
-        BaseFileType.__init__(self, {}, filename=None)
+        BaseFileType.__init__(self, {}, filename=None, is_binary=is_binary)
 
     @classmethod
     def match(cls, filename: Union[str, Path], regex: str = None) -> bool:
@@ -82,6 +82,7 @@ class ReaderPlugin(PluginBase, BaseFileType):
         # ensure that filename is set for loading and that it does exist
         self.ensure_filename_set(must_exist=True)
 
+        print("333333333", self.filename, "binary:", self.is_binary)
         self._f = self.filename.open("rb" if self.is_binary else "r")
 
         return self

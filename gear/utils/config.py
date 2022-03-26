@@ -21,11 +21,22 @@ DATA_DIR = Path(
     )
 ).expanduser()
 
+
+# directory to which output is written
 OUTPUT_DIR = DATA_DIR.joinpath("output/")
 
+# directory where installed plugins are located
 PLUGIN_DIR = Path(
     os.getenv(
         "GEAR_PLUGIN_DIRECTORY",
         DATA_DIR.joinpath("plugins/")
+    ),
+).expanduser()
+
+# directory where installed templates are located
+TEMPLATE_DIR = Path(
+    os.getenv(
+        "GEAR_TEMPLATE_DIRECTORY",
+        DATA_DIR.joinpath("templates/")
     ),
 ).expanduser()
