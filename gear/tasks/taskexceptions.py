@@ -14,3 +14,9 @@ class ReporterTaskException(Exception):
     """
     reporter task exception
     """
+
+
+class ReportAggregatorTaskException(Exception):
+    """
+    reporter aggregator task exception
+    """

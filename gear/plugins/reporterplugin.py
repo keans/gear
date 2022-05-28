@@ -1,9 +1,7 @@
 from pathlib import Path
 
 from gear.base.pluginbase import PluginBase
-from gear.utils.typing import PathOrString
-from gear.utils.config import TEMPLATE_DIR
-from gear.utils.render import render
+from gear.base.mixins.templatemixin import TemplateMixin
 
 
 # default report plugin schema
@@ -17,29 +15,15 @@ default_report_plugin_schema = {
 }
 
 
-class ReporterPlugin(PluginBase):
+class ReporterPlugin(TemplateMixin, PluginBase):
     """
     report plugin
     """
     def __init__(self, schema=default_report_plugin_schema):
         PluginBase.__init__(self, schema)
+        TemplateMixin.__init__(self)
 
         self._res = {}
-
-    def render(self, template_filename: PathOrString, **kwargs) -> str:
-        """
-        render template file with given arguments
-
-        :param template_filename: template filename
-        :type template_filename: PathOrString
-        :return: rendered template
-        :rtype: str
-        """
-        return render(
-            search_path=TEMPLATE_DIR.joinpath(self.__class__.__name__),
-            template_filename=self.argconfig["template"],
-            **kwargs
-        )
 
     def apply(self, value: dict):
         """
@@ -53,8 +37,12 @@ class ReporterPlugin(PluginBase):
             **value
         )
 
-    def init(self, **kwargs):
-        self.set_config(kwargs)
+    def init(
+        self,
+        config_name: str,
+        **kwargs
+    ):
+        self.set_config(config_name=config_name, value=kwargs)
 
     def run(self, fn):
         print("WORKING ON ")

@@ -1,6 +1,6 @@
+import inspect
 import logging
 from pathlib import Path
-from abc import abstractmethod
 from typing import Any
 
 from powerstrip import Plugin, PluginManager
@@ -12,19 +12,39 @@ class PluginBase(Plugin):
     """
     plugin base from which all plugins must be derived
     """
-    def __init__(self, schema):
+    def __init__(self, schema: dict):
         Plugin.__init__(self)
 
         self.log = logging.getLogger(__name__)
         self.schema = schema
+        self.config_name = None
 
-    def set_config(self, value: dict):
+    @property
+    def directory(self) -> Path:
+        """
+        returns the plugin's directory
+
+        :return: plugin directory
+        :rtype: Path
+        """
+        return Path(
+            inspect.getfile(self.__class__)
+        ).parent
+
+    def set_config(
+        self,
+        config_name: str,
+        value: dict
+    ):
         """
         set the plugin's configuration
 
+        :param config_name: name of the configuration
+        :type config_name: str
         :param value: configuration dictionary
         :type value: dict
         """
+        self.config_name = config_name
         self.argconfig = ArgConfig(schema=self.schema, d=value)
 
     @classmethod

@@ -32,11 +32,3 @@ PLUGIN_DIR = Path(
         DATA_DIR.joinpath("plugins/")
     ),
 ).expanduser()
-
-# directory where installed templates are located
-TEMPLATE_DIR = Path(
-    os.getenv(
-        "GEAR_TEMPLATE_DIRECTORY",
-        DATA_DIR.joinpath("templates/")
-    ),
-).expanduser()

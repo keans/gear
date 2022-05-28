@@ -14,7 +14,7 @@ class BaseFileTypeException(Exception):
 
 class BaseFileType(abc.ABC):
     """
-    base file type
+    abstract base file type class
     """
     def __init__(
         self,
@@ -67,6 +67,7 @@ class BaseFileType(abc.ABC):
         :raises BaseFileTypeException: filename not set exception
         """
         if self.filename is None:
+            # filename not set
             raise BaseFileTypeException(
                 "The filename is not set!"
             )

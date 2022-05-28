@@ -1,16 +1,15 @@
 from cmath import log
 import sys
-import getpass
-import socket
 import logging
+import shutil
 
 import click
 import luigi
 from powerstrip import PluginManager
 
-from gear.utils.config import CONFIG_DIRECTORY, PLUGIN_DIR
+from gear.utils.config import CONFIG_DIRECTORY, OUTPUT_DIR, PLUGIN_DIR
 from gear.evaluator.evaluatorconfigmanager import EvaluatorConfigManager
-from gear.utils.utils import ensure_path, guess_filename
+from gear.utils.utils import ensure_path, guess_filename, get_user
 from gear.utils.config import CONFIG_DIRECTORY
 from gear.utils.utils import get_classes
 from gear.tasks.starttask import StartTask
@@ -29,8 +28,16 @@ def cli(debug):
     #click.echo(f"Debug mode is {'on' if debug else 'off'}")
 
 
-@cli.command()
-@click.option('--full/--no-full', default=False)
+@cli.group()
+def config():
+    """
+    config subcommand
+    """
+    pass
+
+
+@config.command()
+@click.option("--full/--no-full", default=False)
 def list(full):
     """
     list all existing configurations
@@ -45,9 +52,17 @@ def list(full):
             click.echo(conf.name)
 
 
-@cli.command()
+@config.command()
 @click.argument("name")
-def view(name):
+def view(name: str):
+    """
+    view config
+
+    :param name: name of the config file
+    :type name: str
+    :raises click.ClickException: raised, if config file is not found
+    """
+
     try:
         # ensure that filename is a Path
         fn = guess_filename(name, CONFIG_DIRECTORY, ".yml")
@@ -59,7 +74,7 @@ def view(name):
         raise click.ClickException(e)
 
 
-@cli.command()
+@config.command()
 @click.argument(
     "name",
 )
@@ -69,13 +84,11 @@ def view(name):
 )
 @click.option(
     "--author",
-    default=(
-        f"{getpass.getuser()} <{getpass.getuser()}@{socket.gethostname()}>"
-    ),
+    default=get_user(),
     show_default=True,
     help="name of the author of the configuration"
 )
-def create_config(name: str, description: str, author: str):
+def create(name: str, description: str, author: str):
     """
     create a new configuration file
 
@@ -105,11 +118,11 @@ def create_config(name: str, description: str, author: str):
 
 
 @cli.command()
-@click.argument("name")
-def run(name):
+@click.argument("configname")
+def run(configname):
     try:
         # ensure that filename is a Path
-        fn = guess_filename(name, CONFIG_DIRECTORY, ".yml")
+        fn = guess_filename(configname, CONFIG_DIRECTORY, ".yml")
 
         src_directory = "."
 
@@ -126,13 +139,45 @@ def run(name):
 
 
 @cli.command()
+@click.argument("configname")
+def reset(configname: str):
+    """
+    reset the output directory
+
+    :param configname: configuration name
+    :type configname: str
+    :raises click.ClickException: raised, if config does not exist
+    """
+    try:
+        # ensure that filename is a Path
+        fn = guess_filename(configname, CONFIG_DIRECTORY, ".yml")
+
+        output_dir = OUTPUT_DIR.joinpath(configname)
+        if output_dir.exists():
+            # remove the output directory
+            click.echo(f"removing '{output_dir}'...")
+            shutil.rmtree(output_dir)
+
+    except FileNotFoundError as e:
+        raise click.ClickException(e)
+
+
+
+@cli.group()
+def plugin():
+    """
+    plugin subcommand
+    """
+    pass
+
+@plugin.command()
 @click.argument("directory")
 def pack(directory):
     pm = PluginManager(PLUGIN_DIR, use_category=True)
     pm.pack(directory)
 
 
-@cli.command()
+@plugin.command()
 @click.argument("package")
 def install(package):
     pm = PluginManager(PLUGIN_DIR, use_category=True)

@@ -3,15 +3,13 @@ from typing import Any, Union
 from luigi.freezing import FrozenOrderedDict
 
 from gear.base.argconfig.argconfigvalidator import ArgConfigValidator
-
-
-class ArgConfigException(Exception):
-    """
-    argument configuration exception
-    """
+from gear.base.exceptions import ArgConfigException
 
 
 class ArgConfig:
+    """
+    argument configuration for plugins
+    """
     def __init__(
         self,
         schema: dict,
@@ -57,6 +55,12 @@ class ArgConfig:
             raise ArgConfigException(self.validator.errors)
 
     def __repr__(self) -> str:
+        """
+        return the string representation of the argument configuration
+
+        :return: string representation of the argument configuration
+        :rtype: str
+        """
         return (
             f"<ArgConfig(dict={self.dict})>"
         )

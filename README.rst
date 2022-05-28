@@ -32,6 +32,17 @@ Development
     source env/bin/activate
 
 
+Usage
+-----
+
+::
+
+    # list all configurations
+    wrench list
+
+    
+
+
 Links
 -----
 

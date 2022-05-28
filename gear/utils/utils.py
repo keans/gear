@@ -1,4 +1,6 @@
 import sys
+import getpass
+import socket
 import importlib
 from pathlib import Path
 from typing import Any
@@ -138,3 +140,13 @@ def guess_filename(
     raise FileNotFoundError(
          f"The file '{name}' could not be found!"
     )
+
+
+def get_user() -> str:
+    """
+    return current user at current host
+
+    :return: user@host
+    :rtype: str
+    """
+    return f"{getpass.getuser()} <{getpass.getuser()}@{socket.gethostname()}>"

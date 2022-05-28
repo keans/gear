@@ -4,6 +4,7 @@ from pathlib import Path
 
 from gear.base.basefiletype import BaseFileType
 from gear.base.pluginbase import PluginBase
+from gear.utils.typing import PathOrString
 from gear.utils.utils import ensure_path
 
 
@@ -82,7 +83,7 @@ class ReaderPlugin(PluginBase, BaseFileType):
         # ensure that filename is set for loading and that it does exist
         self.ensure_filename_set(must_exist=True)
 
-        print("333333333", self.filename, "binary:", self.is_binary)
+        # open the file either as binary or as text
         self._f = self.filename.open("rb" if self.is_binary else "r")
 
         return self
@@ -115,10 +116,14 @@ class ReaderPlugin(PluginBase, BaseFileType):
 
         return (row for row in self._f)
 
-    def init(self, filename: Union[str, Path], config: dict):
+    def init(
+        self,
+        filename: PathOrString,
+        config_name: str,
+        **kwargs
+    ):
         self.filename = filename
-
-        self.set_config(config)
+        self.set_config(config_name=config_name, value=kwargs)
 
     def run(self, fn):
         print("WORKING ON ")

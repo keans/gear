@@ -1,56 +1,26 @@
-from email.generator import Generator
+import datetime
 import hashlib
 import json
-from typing import Any
+from typing import Any, Generator
 
 import luigi
 
+from gear.base.mixins.pluginstaskmixin import PluginsTaskMixin
 from gear.utils.parameters import PathParameter
+from gear.utils.directorymanager import DirectoryManager
 from gear.utils.config import OUTPUT_DIR, PLUGIN_DIR
-from gear.plugins.extractorplugin import ExtractorPlugin
-from gear.plugins.transformerplugin import TransformerPlugin
-from gear.plugins.reporterplugin import ReporterPlugin
+from gear.utils.utils import get_user
 
 
-class BaseTaskException(Exception):
+class BaseTask(PluginsTaskMixin, luigi.Task):
     """
-    base task exception
-    """
-
-
-class BaseTask(luigi.Task):
-    """
-    base task
+    base task class that is used as parent for all other tasks
     """
     input_filename = PathParameter()
     config = luigi.parameter.DictParameter()
+    config_name = luigi.Parameter()
+    plugin_section = luigi.Parameter()
     output_suffix = luigi.Parameter(default=".json")
-    plugin_section = luigi.parameter.Parameter(default=None)
-
-    @property
-    def plugin_class(self) -> Any:
-        """
-        get all plugin classes based on internal plugin_section variable
-
-        :raises NotImplementedError: raised, if no plugin class found
-        :return: plugin class
-        :rtype: Any
-        """
-        # get plugin class based on plugin section
-        plugin_cls = {
-            "extractors": ExtractorPlugin,
-            "transformers": TransformerPlugin,
-            "reporters": ReporterPlugin
-        }.get(self.plugin_section, None)
-
-        if plugin_cls is None:
-            # undefined plugin section
-            raise NotImplementedError(
-                f"No plugin class defined for plugin section "
-                f"'{self.plugin_section}'!"
-            )
-
-        return plugin_cls
 
     @property
     def filetype(self) -> str:
@@ -71,6 +41,7 @@ class BaseTask(luigi.Task):
         :return: output filename
         :rtype: str
         """
+        # compute hash of input filename
         h = hashlib.sha256(
             self.input_filename.as_posix().encode("utf-8")
         ).hexdigest()
@@ -91,33 +62,15 @@ class BaseTask(luigi.Task):
         ).get(self.plugin_section, {})
 
     @property
-    def plugins(self) -> list:
+    def directory_manager(self) -> DirectoryManager:
         """
-        returns all configured plugin class instances
+        returns an instance of the directory manager that is
+        used to manage the directories
 
-        :return: returns all configured plugin class instances
-        :rtype: list
+        :return: directory manager
+        :rtype: DirectoryManager
         """
-        plugins = []
-        for config in self.config.get(self.plugin_section, []):
-            for plugin_name, plugin_config in config.items():
-                if plugin_name not in self.available_plugin_classes:
-                    # unknown extractor plugin in config, but not installed
-                    raise BaseTaskException(
-                        f"Unknown plugin '{plugin_name}'!"
-                    )
-
-                # create extractor plugin instance
-                plugins.append(
-                    self.available_plugin_classes[plugin_name]()
-                )
-
-                 # initialize plugin with given config
-                plugins[-1].init(
-                    **(plugin_config or {}).get("kwargs", {})
-                )
-
-        return plugins
+        return DirectoryManager(OUTPUT_DIR, self.config_name)
 
     def output(self) -> Any:
         """
@@ -127,12 +80,14 @@ class BaseTask(luigi.Task):
         :rtype: Any
         """
         return luigi.LocalTarget(
-            OUTPUT_DIR.joinpath(self.output_filename)
+            self.directory_manager.temp_directory.joinpath(
+                self.output_filename
+            )
         )
 
     def load(self) -> Generator:
         """
-        load input files
+        load input files and return their content as generator
 
         :yield: file input
         :rtype: Generator
@@ -149,4 +104,15 @@ class BaseTask(luigi.Task):
         :type value: dict
         """
         with self.output().open("w") as f:
-            json.dump(value, f)
+            # prepare dictionary to be stored with header and payload
+            d = {
+                "header": {
+                    "ts": datetime.datetime.now().isoformat(),
+                    "input_filename": self.input_filename.as_posix(),
+                    "user": get_user()
+                },
+                "payload": value,
+            }
+
+            # dump the dictionary
+            json.dump(d, f)

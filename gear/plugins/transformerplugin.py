@@ -11,8 +11,12 @@ class TransformerPlugin(PluginBase):
 
         self._res = {}
 
-    def init(self, **kwargs):
-        self.set_config(kwargs)
+    def init(
+        self,
+        config_name: str,
+        **kwargs
+    ):
+        self.set_config(config_name=config_name, value=kwargs)
 
     def run(self, fn):
         print("WORKING ON ")

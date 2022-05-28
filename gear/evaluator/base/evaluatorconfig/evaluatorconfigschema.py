@@ -47,6 +47,12 @@ evaluator_config_schema = {
                     "schema": {
                         "type": "dict"
                     }
+                },
+                "reportaggregators": {
+                    "type": "list",
+                    "schema": {
+                        "type": "dict"
+                    }
                 }
             }
         }
