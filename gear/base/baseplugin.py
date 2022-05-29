@@ -2,15 +2,17 @@ import inspect
 import logging
 from pathlib import Path
 from typing import Any
+from gear.utils.typing import PathOrString
 
 from powerstrip import Plugin, PluginManager
 
 from gear.base.argconfig.argconfig import ArgConfig
+from gear.utils.utils import ensure_path
 
 
-class PluginBase(Plugin):
+class BasePlugin(Plugin):
     """
-    plugin base from which all plugins must be derived
+    base plugin from which all plugins must be derived
     """
     def __init__(self, schema: dict):
         Plugin.__init__(self)
@@ -74,3 +76,19 @@ class PluginBase(Plugin):
         return pm.get_plugin_classes(
             subclass=subclass or cls, tag=tag
         )
+
+    def init(
+        self,
+        config_name: str,
+        **kwargs
+    ):
+        self.set_config(
+            config_name=config_name,
+            value=kwargs
+        )
+
+    def run(self, fn):
+        pass
+
+    def shutdown(self):
+        pass

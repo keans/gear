@@ -9,9 +9,9 @@ from powerstrip import PluginManager
 
 from gear.utils.config import CONFIG_DIRECTORY, OUTPUT_DIR, PLUGIN_DIR
 from gear.evaluator.evaluatorconfigmanager import EvaluatorConfigManager
-from gear.utils.utils import ensure_path, guess_filename, get_user
+from gear.utils.utils import guess_filename, get_user
 from gear.utils.config import CONFIG_DIRECTORY
-from gear.utils.utils import get_classes
+from gear.utils.directorymanager import DirectoryManager
 from gear.tasks.starttask import StartTask
 
 # add plugin directory to path
@@ -24,8 +24,9 @@ logging.basicConfig(level=logging.WARNING)
 @click.group()
 @click.option("--debug/--no-debug", default=False)
 def cli(debug):
-    pass
-    #click.echo(f"Debug mode is {'on' if debug else 'off'}")
+    if debug is True:
+        # enable DEBUG log level
+        logging.basicConfig(level=logging.DEBUG)
 
 
 @cli.group()
@@ -152,11 +153,11 @@ def reset(configname: str):
         # ensure that filename is a Path
         fn = guess_filename(configname, CONFIG_DIRECTORY, ".yml")
 
-        output_dir = OUTPUT_DIR.joinpath(configname)
-        if output_dir.exists():
+        directory_manager = DirectoryManager(OUTPUT_DIR, configname)
+        if directory_manager.temp_directory.exists():
             # remove the output directory
-            click.echo(f"removing '{output_dir}'...")
-            shutil.rmtree(output_dir)
+            click.echo(f"removing '{directory_manager.temp_directory}'...")
+            shutil.rmtree(directory_manager.temp_directory)
 
     except FileNotFoundError as e:
         raise click.ClickException(e)

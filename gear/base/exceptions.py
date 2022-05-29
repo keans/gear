@@ -4,7 +4,13 @@ class ArgConfigException(Exception):
     """
 
 
-class PluginsTaskMixinException(Exception):
+class BaseTaskException(Exception):
     """
-    plugins task mixin exception
+    base task exception
+    """
+
+
+class TemplateMixinException(Exception):
+    """
+    template mixin exception
     """

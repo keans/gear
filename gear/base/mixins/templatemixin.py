@@ -1,7 +1,14 @@
+import logging
 from pathlib import Path
 
 from gear.utils.typing import PathOrString
 from gear.utils.render import render
+from gear.utils.utils import ensure_path
+from gear.base.exceptions import TemplateMixinException
+
+
+# prepare logger
+log = logging.getLogger(__name__)
 
 
 class TemplateMixin:
@@ -9,16 +16,31 @@ class TemplateMixin:
     template mixin that can be used for classes that should use
     template rendering
     """
+    def __init__(self):
+        self.template_dir = None
+
     @property
     def template_dir(self) -> Path:
         """
-        returns the template directory of the report plugin consisting of
-        base template directory and the reporter plugin's class name
+        return the template dir
 
         :return: template directory
         :rtype: Path
         """
-        return self.directory.joinpath(self.__class__.__name__)
+        return self._template_dir
+
+    @template_dir.setter
+    def template_dir(self, value: PathOrString):
+        """
+        set the template directory
+
+        :param value: template directory
+        :type value: PathOrString
+        """
+        if value is None:
+            self._template_dir = None
+        else:
+            self._template_dir = ensure_path(value)
 
     @property
     def template_filename(self) -> Path:
@@ -28,33 +50,9 @@ class TemplateMixin:
         :return: template filename
         :rtype: Path
         """
+        assert (self.template_dir is not None)
+
         return self.template_dir.joinpath(self.argconfig["template"])
-
-    def init_template(self, kwargs: dict):
-        """
-        initialize the template directory and add empty
-        template if not existing
-
-        :param kwargs: dictionary with values that should be rendered
-        """
-        if self.template_filename.exists():
-            # do nothing if template does already exist
-            return
-
-        # template file does not exist yet
-        self.log.debug(
-            f"Creating empty template file '{self.template_filename}'..."
-        )
-
-        # ensure that template directory is existing
-        self.template_dir.mkdir(parents=True, exist_ok=True)
-
-        # create empty file
-        with self.template_filename.open("w") as f:
-            f.write(
-                f"Add your template's content to "
-                f"'{self.template_filename}'\n{kwargs}"
-            )
 
     def render(self, template_filename: PathOrString, **kwargs) -> str:
         """
@@ -66,8 +64,15 @@ class TemplateMixin:
         :rtype: str
         """
         # initialize template
-        self.init_template(kwargs)
+        if not self.template_filename.exists():
+            raise TemplateMixinException(
+                f"The template file '{self.template_filename}' does not exist!"
+            )
 
+        log.warning(
+            f"rendering in '{self.template_dir}' the template "
+            f"'{self.argconfig['template']}' with values {kwargs}..."
+        )
         return render(
             search_path=self.template_dir,
             template_filename=self.argconfig["template"],

@@ -20,7 +20,7 @@ class DirectoryManager:
         :return: base directory
         :rtype: Path
         """
-        return self._base_directory.joinpath(self.config_name)
+        return self._base_directory
 
     @base_directory.setter
     def base_directory(self, value: PathOrString):
@@ -30,7 +30,9 @@ class DirectoryManager:
         :param value: base directory
         :type value: PathOrString
         """
-        self._base_directory = ensure_path(value, create_dir=True)
+        self._base_directory = ensure_path(
+            value.joinpath(self.config_name), create_dir=True
+        )
 
     @property
     def temp_directory(self):
@@ -45,5 +47,5 @@ class DirectoryManager:
         return self.base_directory.joinpath("report/")
 
     @property
-    def report_scheme_directory(self):
-        return self.report_directory.joinpath("scheme/")
+    def report_theme_directory(self):
+        return self.report_directory.joinpath("theme/")

@@ -3,7 +3,7 @@ from typing import Any, Union
 from pathlib import Path
 
 from gear.base.basefiletype import BaseFileType
-from gear.base.pluginbase import PluginBase
+from gear.base.baseplugin import BasePlugin
 from gear.utils.typing import PathOrString
 from gear.utils.utils import ensure_path
 
@@ -18,14 +18,14 @@ class ReaderPluginException(Exception):
     """
 
 
-class ReaderPlugin(PluginBase, BaseFileType):
+class ReaderPlugin(BasePlugin, BaseFileType):
     """
     reader plugin
     """
     GLOBS = [".*"]
 
     def __init__(self, schema: dict, is_binary: bool = False):
-        PluginBase.__init__(self, schema)
+        BasePlugin.__init__(self, schema)
         BaseFileType.__init__(self, {}, filename=None, is_binary=is_binary)
 
     @classmethod
@@ -55,7 +55,7 @@ class ReaderPlugin(PluginBase, BaseFileType):
 
     @staticmethod
     def get_plugin(plugin_directory, tag):
-        plugins = PluginBase.get_plugins(
+        plugins = BasePlugin.get_plugins(
             subclass=ReaderPlugin,
             plugin_directory=plugin_directory,
             tag=tag
@@ -123,10 +123,7 @@ class ReaderPlugin(PluginBase, BaseFileType):
         **kwargs
     ):
         self.filename = filename
-        self.set_config(config_name=config_name, value=kwargs)
-
-    def run(self, fn):
-        print("WORKING ON ")
-
-    def shutdown(self):
-        pass
+        self.set_config(
+            config_name=config_name,
+            value=kwargs
+        )

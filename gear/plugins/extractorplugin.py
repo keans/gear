@@ -1,24 +1,12 @@
 
-from gear.base.pluginbase import PluginBase
+from gear.base.baseplugin import BasePlugin
+from gear.utils.typing import PathOrString
 
 
-class ExtractorPlugin(PluginBase):
+class ExtractorPlugin(BasePlugin):
     """
     extractor plugin
     """
     def __init__(self, schema):
-        PluginBase.__init__(self, schema)
+        BasePlugin.__init__(self, schema)
         self._res = {}
-
-    def init(
-        self,
-        config_name: str,
-        **kwargs
-    ):
-        self.set_config(config_name=config_name, value=kwargs)
-
-    def run(self, fn):
-        print("WORKING ON ")
-
-    def shutdown(self):
-        pass

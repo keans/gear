@@ -1,11 +1,13 @@
 import shutil
 from pathlib import Path
-import inspect
+import datetime
+import getpass
+from gear.utils.directorymanager import DirectoryManager
 
 import luigi
 
 from gear.tasks.taskexceptions import ReportAggregatorTaskException
-from gear.base.pluginbase import PluginBase
+from gear.base.baseplugin import BasePlugin
 from gear.base.mixins.templatemixin import TemplateMixin
 from gear.utils.typing import PathOrString
 from gear.utils.config import OUTPUT_DIR
@@ -26,15 +28,25 @@ default_report_aggregator_plugin_schema = {
 }
 
 
-class ReportAggregatorPlugin(TemplateMixin, PluginBase):
+class ReportAggregatorPlugin(TemplateMixin, BasePlugin):
     """
     reporter aggregator plugin
     """
     def __init__(self, schema=default_report_aggregator_plugin_schema):
-        PluginBase.__init__(self, schema)
+        BasePlugin.__init__(self, schema)
         TemplateMixin.__init__(self)
 
         self._res = {}
+
+    @property
+    def directory_manager(self) -> DirectoryManager:
+        """
+        return the instance of the directory manager
+
+        :return: directory manager
+        :rtype: DirectoryManager
+        """
+        return DirectoryManager(OUTPUT_DIR, self.config_name)
 
     @property
     def theme_path(self) -> Path:
@@ -62,18 +74,21 @@ class ReportAggregatorPlugin(TemplateMixin, PluginBase):
         """
         copy the template directory to the output directory
         """
-        theme_output_dir = OUTPUT_DIR.joinpath(
-            self.config_name,
-            self.argconfig["theme"]
-        )
-
-        if not theme_output_dir.exists():
+        if not self.directory_manager.report_theme_directory.exists():
             # copy theme to output directory, if not existing
-            shutil.copytree(self.theme_path, theme_output_dir)
+            shutil.copytree(
+                self.theme_path,
+                self.directory_manager.report_theme_directory
+            )
 
-            # remove base.html from target path since rendering
-            # will not take place in the output path, but before
-            Path(theme_output_dir, "base.html").unlink()
+            # move base.html to template directory
+            print("MOVE", self.directory_manager.templates_directory)
+            shutil.move(
+                self.directory_manager.report_theme_directory.joinpath(
+                    "base.html"
+                ),
+                self.directory_manager.templates_directory
+            )
 
     def apply(self, value: dict):
         """
@@ -82,26 +97,34 @@ class ReportAggregatorPlugin(TemplateMixin, PluginBase):
         :param value: arguments that should be rendered to the report
         :type value: dict
         """
+        # extend with values
+        value["created_at"] = datetime.datetime.now()
+        value["created_by"] = getpass.getuser()
+
         self._res[self.argconfig["template"]] = self.render(
             template_filename=self.argconfig["template"],
-            theme_path=self.theme_path,
             **value
         )
 
     def write(self):
+        """
+        write the plugins' content to the file
+        """
         for template_name, content in self._res.items():
-            with open(OUTPUT_DIR.joinpath(template_name), "w") as f:
+            # prepare output filename
+            fn = self.directory_manager.report_directory.joinpath(
+                template_name
+            )
+
+            # write content to the file
+            with fn.open("w") as f:
                 f.write(content)
 
     def init(
         self,
         config_name: str,
+        template_dir: PathOrString,
         **kwargs
     ):
         self.set_config(config_name=config_name, value=kwargs)
-
-    def run(self, fn):
-        print("WORKING ON ")
-
-    def shutdown(self):
-        pass
+        self.template_dir = template_dir

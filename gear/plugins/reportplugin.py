@@ -1,7 +1,8 @@
 from pathlib import Path
 
-from gear.base.pluginbase import PluginBase
+from gear.base.baseplugin import BasePlugin
 from gear.base.mixins.templatemixin import TemplateMixin
+from gear.utils.typing import PathOrString
 
 
 # default report plugin schema
@@ -15,12 +16,15 @@ default_report_plugin_schema = {
 }
 
 
-class ReporterPlugin(TemplateMixin, PluginBase):
+class ReportPlugin(TemplateMixin, BasePlugin):
     """
     report plugin
     """
-    def __init__(self, schema=default_report_plugin_schema):
-        PluginBase.__init__(self, schema)
+    def __init__(
+        self,
+        schema=default_report_plugin_schema
+    ):
+        BasePlugin.__init__(self, schema)
         TemplateMixin.__init__(self)
 
         self._res = {}
@@ -40,12 +44,8 @@ class ReporterPlugin(TemplateMixin, PluginBase):
     def init(
         self,
         config_name: str,
+        template_dir: PathOrString,
         **kwargs
     ):
         self.set_config(config_name=config_name, value=kwargs)
-
-    def run(self, fn):
-        print("WORKING ON ")
-
-    def shutdown(self):
-        pass
+        self.template_dir = template_dir
