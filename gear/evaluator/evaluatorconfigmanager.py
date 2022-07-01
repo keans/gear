@@ -25,7 +25,11 @@ class EvaluatorConfigManager:
         :return: list of configurations
         :rtype: list
         """
-        return self.config_directory.glob("*.yml")
+        return [
+            fn
+            for fn in self.config_directory.glob("*")
+            if fn.is_dir()
+        ]
 
     @property
     def config_directory(self) -> Path:
@@ -76,30 +80,13 @@ class EvaluatorConfigManager:
         assert isinstance(author, str)
         assert (filename is None) or isinstance(filename, (str, Path))
 
-        if not filename:
-            # set automatic filename, if not set
-            filename = self.config_directory.joinpath(
-                f"{name}.yml"
-            )
-
-        else:
-            # ensure that filename is Path
-            filename = ensure_path(filename)
-
-        if filename.exists():
-            # file does already exist
-            raise FileExistsError(
-                f"The config file '{filename}' does already exist!"
-            )
-
-        # prepare new config file
-        ec = EvaluatorConfig(
-            filename=filename,
+        # create new configuration file
+        return EvaluatorConfig.create_file(
+            config_directory=self.config_directory,
             name=name,
             description=description,
             author=author
         )
-        return ec.save()
 
     @staticmethod
     def load_config(

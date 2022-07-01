@@ -48,10 +48,63 @@ class EvaluatorConfig:
         :return: evaluator config
         :rtype: EvaluatorConfig
         """
+
+
         ec = EvaluatorConfig(filename=filename)
         ec.load()
 
         return ec
+
+    @staticmethod
+    def create_file(
+        config_directory: Union[str, Path],
+        name: str,
+        description: str,
+        author: str,
+    ) -> Path:
+        """
+        create a new config file
+
+        :param config_directory: directory in which the config should be stored
+        :type config_directory: Union[str, Path]
+        :param name: name of the configuration (will be name of config file)
+        :type name: str
+        :param description: description of the configuration
+        :type description: str
+        :param author: author of the configuration
+        :type author: str
+        :return: name of the main config file
+        :rtype: Path
+        """
+        assert isinstance(config_directory, (str, Path))
+        assert isinstance(name, str)
+        assert isinstance(description, str)
+        assert isinstance(author, str)
+
+        # ensure directory
+        config_directory = ensure_path(config_directory)
+
+        # add config name to directory
+        config_directory = config_directory.joinpath(name)
+        config_directory.mkdir()
+
+        # prepare configuration filename
+        filename = config_directory.joinpath(f"{name}.yml")
+
+        if filename.exists():
+            # file does already exist
+            raise FileExistsError(
+                f"The config file '{filename}' does already exist!"
+            )
+
+        # prepare new config file
+        ec = EvaluatorConfig(
+            filename=filename,
+            name=name,
+            description=description,
+            author=author
+        )
+        return ec.save()
 
     @property
     def yaml(self) -> str:

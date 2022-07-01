@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # base config directory
-CONFIG_DIRECTORY = Path(
+CONFIG_DIR = Path(
     os.getenv("GEAR_CONFIG_DIRECTORY", "~/.config/gear/")
 ).expanduser()
 

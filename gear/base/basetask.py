@@ -8,11 +8,10 @@ from gear.base.mixins.templatemixin import TemplateMixin
 import luigi
 
 
-from gear.utils.typing import PathOrString
 from gear.utils.parameters import PathParameter
 from gear.utils.directorymanager import DirectoryManager
-from gear.utils.config import OUTPUT_DIR, PLUGIN_DIR
-from gear.utils.utils import get_user
+from gear.utils.taskdumper import TaskDumper
+from gear.utils.config import OUTPUT_DIR, CONFIG_DIR, PLUGIN_DIR
 from gear.base.exceptions import BaseTaskException
 from gear.plugins.extractorplugin import ExtractorPlugin
 from gear.plugins.transformerplugin import TransformerPlugin
@@ -90,7 +89,11 @@ class BaseTask(luigi.Task):
         :return: directory manager
         :rtype: DirectoryManager
         """
-        return DirectoryManager(OUTPUT_DIR, self.config_name)
+        return DirectoryManager(
+            output_directory=OUTPUT_DIR,
+            config_directory=CONFIG_DIR,
+            config_name=self.config_name
+        )
 
     def output(self) -> Any:
         """
@@ -110,28 +113,22 @@ class BaseTask(luigi.Task):
         """
         for input_file in self.input():
             with input_file.open("r") as f:
-                yield json.load(f)
+                yield TaskDumper.from_file(f=f)
 
     def dump(self, value: dict):
         """
-        dump given dictionary to
+        dump given dictionary to a file
 
         :param value: dictionary with values to be stored
         :type value: dict
         """
         with self.output().open("w") as f:
-            # prepare dictionary to be stored with header and payload
-            d = {
-                "header": {
-                    "ts": datetime.datetime.now().isoformat(),
-                    "input_filename": self.input_filename.as_posix(),
-                    "user": get_user()
-                },
-                "payload": value,
-            }
-
-            # dump the dictionary
-            json.dump(d, f)
+            # use task dumper to dump the dictionary information
+            td = TaskDumper(
+                input_filename=self.input_filename.as_posix(),
+                payload=value
+            )
+            td.dump(f)
 
     @property
     def plugin_class(self) -> Any:
@@ -212,9 +209,8 @@ class BaseTask(luigi.Task):
         :return: dictionary of plugin results
         :rtype: dict
         """
-        for data in data_generator:
+        for task_dumper in data_generator:
             # get payload from data generator
-            payload = data.get("payload", {})
             for plugin in self.plugins:
                 # get required plugins
                 required_plugins = set(
@@ -223,7 +219,7 @@ class BaseTask(luigi.Task):
 
                 # check for missing ones that are required as input
                 missing_plugins = (
-                    required_plugins - set(payload.keys())
+                    required_plugins - set(task_dumper.payload.keys())
                 )
                 if len(missing_plugins) > 0:
                     # missing plugin input
@@ -235,8 +231,9 @@ class BaseTask(luigi.Task):
 
                 # apply to input data
                 plugin.apply(
-                    value={
-                        required_plugin: payload[required_plugin]
+                    header=task_dumper.header,
+                    payload={
+                        required_plugin: task_dumper.payload[required_plugin]
                         for required_plugin in required_plugins
                     }
                 )

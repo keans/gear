@@ -10,7 +10,7 @@ from gear.tasks.taskexceptions import ReportAggregatorTaskException
 from gear.base.baseplugin import BasePlugin
 from gear.base.mixins.templatemixin import TemplateMixin
 from gear.utils.typing import PathOrString
-from gear.utils.config import OUTPUT_DIR
+from gear.utils.config import OUTPUT_DIR, CONFIG_DIR
 from gear.utils.render import render
 
 
@@ -32,7 +32,10 @@ class ReportAggregatorPlugin(TemplateMixin, BasePlugin):
     """
     reporter aggregator plugin
     """
-    def __init__(self, schema=default_report_aggregator_plugin_schema):
+    def __init__(
+        self,
+        schema=default_report_aggregator_plugin_schema
+    ):
         BasePlugin.__init__(self, schema)
         TemplateMixin.__init__(self)
 
@@ -46,7 +49,11 @@ class ReportAggregatorPlugin(TemplateMixin, BasePlugin):
         :return: directory manager
         :rtype: DirectoryManager
         """
-        return DirectoryManager(OUTPUT_DIR, self.config_name)
+        return DirectoryManager(
+            output_directory=OUTPUT_DIR,
+            config_directory=CONFIG_DIR,
+            config_name=self.config_name
+        )
 
     @property
     def theme_path(self) -> Path:
@@ -90,20 +97,25 @@ class ReportAggregatorPlugin(TemplateMixin, BasePlugin):
                 self.directory_manager.templates_directory
             )
 
-    def apply(self, value: dict):
+    def apply(
+        self,
+        header: dict,
+        payload: dict
+    ):
         """
-        render given value in template provided via configuration
+        render given header and paylaod in template provided via configuration
 
-        :param value: arguments that should be rendered to the report
-        :type value: dict
+        :param header: header information
+        :type header: dict
+        :param payload: payload information
+        :type payload: dict
         """
-        # extend with values
-        value["created_at"] = datetime.datetime.now()
-        value["created_by"] = getpass.getuser()
-
         self._res[self.argconfig["template"]] = self.render(
             template_filename=self.argconfig["template"],
-            **value
+            header=header,
+            payload=payload,
+            created_at=datetime.datetime.now(),
+            created_by=getpass.getuser()
         )
 
     def write(self):

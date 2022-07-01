@@ -29,16 +29,23 @@ class ReportPlugin(TemplateMixin, BasePlugin):
 
         self._res = {}
 
-    def apply(self, value: dict):
+    def apply(
+        self,
+        header: dict,
+        payload: dict
+    ):
         """
-        render given value in template provided via configuration
+        render given header and paylaod in template provided via configuration
 
-        :param value: arguments that should be rendered to the report
-        :type value: dict
+        :param header: header information
+        :type header: dict
+        :param payload: payload information
+        :type payload: dict
         """
         self._res[self.argconfig["template"]] = self.render(
             template_filename=self.argconfig["template"],
-            **value
+            header=header,
+            payload=payload
         )
 
     def init(

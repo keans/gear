@@ -1,9 +1,14 @@
+import logging
 from pathlib import Path
 
 import jinja2
 
 from gear.utils.typing import PathOrString
 from gear.utils.utils import ensure_path
+
+
+# prepare logger
+log = logging.getLogger(__name__)
 
 
 def render(
@@ -32,5 +37,9 @@ def render(
         loader=jinja2.FileSystemLoader(searchpath=search_path)
     )
     template = templateEnv.get_template(template_filename.as_posix())
+
+    log.info(
+        f"rendering '{template_filename.as_posix()}' with {kwargs}..."
+    )
 
     return template.render(**kwargs)

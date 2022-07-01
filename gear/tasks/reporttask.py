@@ -22,7 +22,9 @@ class ReportTask(BaseTask):
         run the report task
         """
         # apply plugins
-        res = self.apply_plugins(self.load())
+        res = self.apply_plugins(
+            data_generator=self.load()
+        )
 
         # dump plugin results
         self.dump(res)

@@ -132,7 +132,10 @@ def guess_filename(
     for directory in directories:
         # try to get file from directory
         for filename in (name, f"{name}{default_extension}"):
-            if directory.joinpath(filename).exists():
+            if (
+                directory.joinpath(filename).exists() and
+                not directory.joinpath(filename).is_dir()
+            ):
                 # return existing, filename
                 return directory.joinpath(filename)
 

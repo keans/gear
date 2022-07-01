@@ -8,43 +8,73 @@ class DirectoryManager:
     """
     class to manage the directories of the output directory
     """
-    def __init__(self, base_directory: PathOrString, config_name: str):
+    def __init__(
+        self,
+        output_directory: PathOrString,
+        config_directory: PathOrString,
+        config_name: str
+    ):
         self.config_name = config_name
-        self.base_directory = base_directory
+        self.config_directory = config_directory
+        self.output_directory = output_directory
 
     @property
-    def base_directory(self) -> Path:
+    def config_directory(self) -> Path:
         """
-        returns the base directory
+        returns the config directory
 
-        :return: base directory
+        :return: config directory
         :rtype: Path
         """
-        return self._base_directory
+        return self._config_directory
 
-    @base_directory.setter
-    def base_directory(self, value: PathOrString):
+    @config_directory.setter
+    def config_directory(self, value: PathOrString):
         """
-        set the base directory
+        set the config directory
 
-        :param value: base directory
+        :param value: config directory
         :type value: PathOrString
         """
-        self._base_directory = ensure_path(
-            value.joinpath(self.config_name), create_dir=True
+        self._config_directory = ensure_path(
+            path=value.joinpath(self.config_name),
+            must_exist=True
         )
 
     @property
-    def temp_directory(self):
-        return self.base_directory.joinpath("tmp/")
+    def output_directory(self) -> Path:
+        """
+        returns the output directory
+
+        :return: output directory
+        :rtype: Path
+        """
+        return self._output_directory
+
+    @output_directory.setter
+    def output_directory(self, value: PathOrString):
+        """
+        set the output directory
+
+        :param value: output directory
+        :type value: PathOrString
+        """
+        self._output_directory = ensure_path(
+            path=value.joinpath(self.config_name),
+            create_dir=True
+        )
 
     @property
     def templates_directory(self):
-        return self.base_directory.joinpath("templates/")
+        return self.config_directory.joinpath("templates/")
+
+    @property
+    def temp_directory(self):
+        return self.output_directory.joinpath("tmp/")
 
     @property
     def report_directory(self):
-        return self.base_directory.joinpath("report/")
+        return self.output_directory.joinpath("report/")
 
     @property
     def report_theme_directory(self):
