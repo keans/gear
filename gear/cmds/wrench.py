@@ -15,9 +15,6 @@ from gear.tasks.starttask import StartTask
 # add plugin directory to path
 sys.path.append(PLUGIN_DIR)
 
-# set logging level
-# logging.basicConfig(level=logging.WARNING)
-
 
 @click.group()
 @click.option("--debug/--no-debug", default=False)
@@ -29,14 +26,27 @@ def cli(debug):
         logging.basicConfig(level=logging.INFO)
 
 
+# add subcommands
 from gear.cmds.subcommands.config import config
+from gear.cmds.subcommands.plugin import plugin
 cli.add_command(config)
-
+cli.add_command(plugin)
 
 
 @cli.command()
 @click.argument("configname")
-def run(configname):
+@click.option(
+    "--local/--no-local", default=True, show_default=True,
+    help="use local scheduler"
+)
+@click.option(
+    "--workers", default=1, show_default=True,
+    help="number of workers"
+)
+def run(configname, local, workers):
+    """
+    run given analysis
+    """
     try:
         # ensure that filename is a Path
         fn = guess_filename(
@@ -45,13 +55,11 @@ def run(configname):
             default_extension=".yml"
         )
 
-        src_directory = "."
-
         # start task
         luigi.build(
-            [StartTask(config_filename=fn, src_directory=src_directory)],
-            workers=1,
-            local_scheduler=True,
+            [StartTask(config_filename=fn, src_directory=".")],
+            workers=workers,
+            local_scheduler=local,
             log_level=logging.getLevelName(logging.INFO)
         )
 
@@ -63,7 +71,7 @@ def run(configname):
 @click.argument("configname")
 def reset(configname: str):
     """
-    reset the output directory
+    reset the analysis' output directory
 
     :param configname: configuration name
     :type configname: str
@@ -89,4 +97,3 @@ def reset(configname: str):
 
     except FileNotFoundError as e:
         raise click.ClickException(e)
-
