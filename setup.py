@@ -43,7 +43,7 @@ setup(
     install_requires=[
         "pyyaml", "cerberus", "python-dotenv", "click",
         "pandas", "dpkt", "xlrd", "openpyxl", "luigi",
-        "python-powerstrip", "jinja2"
+        "python-powerstrip", "jinja2", "transitions"
     ],
     extra_require={
         "docs": ["mkdocs"],
