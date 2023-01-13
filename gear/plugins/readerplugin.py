@@ -24,7 +24,7 @@ class ReaderPlugin(BasePlugin, BaseFileType):
     """
     GLOBS = [".*"]
 
-    def __init__(self, schema: dict, is_binary: bool = False):
+    def __init__(self, schema: dict = {}, is_binary: bool = False):
         BasePlugin.__init__(self, schema)
         BaseFileType.__init__(self, {}, filename=None, is_binary=is_binary)
 

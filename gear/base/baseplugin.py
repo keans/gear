@@ -14,7 +14,7 @@ class BasePlugin(Plugin):
     """
     base plugin from which all plugins must be derived
     """
-    def __init__(self, schema: dict):
+    def __init__(self, schema: dict = {}):
         Plugin.__init__(self)
 
         self.log = logging.getLogger(__name__)

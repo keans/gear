@@ -22,7 +22,7 @@ class ReportPlugin(TemplateMixin, BasePlugin):
     """
     def __init__(
         self,
-        schema=default_report_plugin_schema
+        schema: dict = default_report_plugin_schema
     ):
         BasePlugin.__init__(self, schema)
         TemplateMixin.__init__(self)

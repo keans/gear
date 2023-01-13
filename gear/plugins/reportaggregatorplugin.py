@@ -34,7 +34,7 @@ class ReportAggregatorPlugin(TemplateMixin, BasePlugin):
     """
     def __init__(
         self,
-        schema=default_report_aggregator_plugin_schema
+        schema : dict = default_report_aggregator_plugin_schema
     ):
         BasePlugin.__init__(self, schema)
         TemplateMixin.__init__(self)
@@ -89,7 +89,6 @@ class ReportAggregatorPlugin(TemplateMixin, BasePlugin):
             )
 
             # move base.html to template directory
-            print("MOVE", self.directory_manager.templates_directory)
             shutil.move(
                 self.directory_manager.report_theme_directory.joinpath(
                     "base.html"

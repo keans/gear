@@ -17,7 +17,7 @@ CONFIG_DIR = Path(
 DATA_DIR = Path(
     os.getenv(
         "GEAR_DATA_DIRECTORY",
-        "/tmp/data"
+        "/tmp/gear_data"
     )
 ).expanduser()
 
@@ -25,10 +25,20 @@ DATA_DIR = Path(
 # directory to which output is written
 OUTPUT_DIR = DATA_DIR.joinpath("output/")
 
+
 # directory where installed plugins are located
 PLUGIN_DIR = Path(
     os.getenv(
         "GEAR_PLUGIN_DIRECTORY",
         DATA_DIR.joinpath("plugins/")
+    ),
+).expanduser()
+
+
+# repository directory where packed plugins are located
+PLUGIN_REPOSITORY_DIR = Path(
+    os.getenv(
+        "GEAR_PLUGIN_REPOSITORY_DIRECTORY",
+        "/tmp/gear_pluginsrepo"
     ),
 ).expanduser()
