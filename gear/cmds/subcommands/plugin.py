@@ -59,7 +59,7 @@ def list():
 
                 # print plugin details
                 click.echo(
-                    f"{p.metadata.name:25s} {plugin_type:25s} "
+                    f"{p.metadata.name:45s} {plugin_type:25s} "
                     f"{p.metadata.version}"
                 )
 
