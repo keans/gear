@@ -29,12 +29,18 @@ class ReaderPlugin(BasePlugin, BaseFileType):
         BaseFileType.__init__(self, {}, filename=None, is_binary=is_binary)
 
     @classmethod
-    def match(cls, filename: Union[str, Path], regex: str = None) -> bool:
+    def match(
+        cls,
+        filename: Union[str, Path],
+        regex: str = None
+    ) -> bool:
         """
         returns True, when filename matches globs
 
         :param filename: filename
         :type filename: str or Path
+        :param regex: regex to limit the matches
+        :type regex: str
         :return: True, if filename matches glob
         :rtype: bool
         """
@@ -82,6 +88,13 @@ class ReaderPlugin(BasePlugin, BaseFileType):
         """
         # ensure that filename is set for loading and that it does exist
         self.ensure_filename_set(must_exist=True)
+
+        if not self.match(filename=self.filename, regex=None):
+            # invalid filetype for reader plugin
+            raise NotImplementedError(
+                f"Unknown filename type '{self.filename.suffix}' "
+                f"(valid type: {', '.join(ReaderPlugin.GLOBS)})!"
+            )
 
         # open the file either as binary or as text
         self._f = self.filename.open("rb" if self.is_binary else "r")

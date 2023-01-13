@@ -43,6 +43,23 @@ class TemplateMixin:
             self._template_dir = ensure_path(value)
 
     @property
+    def template_filename_without_path(self) -> str:
+        """
+        returns the template filename without path, i.e., either
+        the template name from the configuration (if set) or otherwise
+        the classname is used as default
+
+        :return: template filename without path
+        :rtype: str
+        """
+        if self.argconfig.contains("template"):
+            # template explicitly define in config
+            return self.argconfig["template"]
+
+        # if not set, use class name as default
+        return f"{self.__class__.__name__}.html"
+
+    @property
     def template_filename(self) -> Path:
         """
         returns the template filename within the template directory
@@ -52,7 +69,9 @@ class TemplateMixin:
         """
         assert (self.template_dir is not None)
 
-        return self.template_dir.joinpath(self.argconfig["template"])
+        return self.template_dir.joinpath(
+            self.template_filename_without_path
+        )
 
     def render(self, template_filename: PathOrString, **kwargs) -> str:
         """
@@ -69,12 +88,12 @@ class TemplateMixin:
                 f"The template file '{self.template_filename}' does not exist!"
             )
 
-        log.warning(
+        log.debug(
             f"rendering in '{self.template_dir}' the template "
             f"'{self.argconfig['template']}' with values {kwargs}..."
         )
         return render(
             search_path=self.template_dir,
-            template_filename=self.argconfig["template"],
+            template_filename=self.template_filename_without_path,
             **kwargs
         )

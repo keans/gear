@@ -48,7 +48,7 @@ setup(
     extra_require={
         "docs": ["mkdocs"],
     },
-    entry_points = {
+    entry_points={
         "console_scripts": [
             "wrench=gear.cmds.wrench:cli"
         ],

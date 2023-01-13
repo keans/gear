@@ -67,7 +67,8 @@ class ReportAggregatorPlugin(TemplateMixin, BasePlugin):
         """
         # get theme path
         theme_path = self.directory.joinpath(
-            "themes", self.argconfig["theme"]
+            "themes",
+            self.argconfig["theme"]
         )
         if not theme_path.is_dir():
             # source theme path directory is not existing
@@ -89,12 +90,16 @@ class ReportAggregatorPlugin(TemplateMixin, BasePlugin):
             )
 
             # move base.html to template directory
-            shutil.move(
-                self.directory_manager.report_theme_directory.joinpath(
-                    "base.html"
-                ),
-                self.directory_manager.templates_directory
-            )
+            try:
+                shutil.move(
+                    self.directory_manager.report_theme_directory.joinpath(
+                        "base.html"
+                    ),
+                    self.directory_manager.templates_directory.as_posix()
+                )
+            except shutil.Error as e:
+                # file exists already
+                self.log.warning(e)
 
     def apply(
         self,
@@ -109,8 +114,8 @@ class ReportAggregatorPlugin(TemplateMixin, BasePlugin):
         :param payload: payload information
         :type payload: dict
         """
-        self._res[self.argconfig["template"]] = self.render(
-            template_filename=self.argconfig["template"],
+        self._res[self.template_filename_without_path] = self.render(
+            template_filename=self.template_filename_without_path,
             header=header,
             payload=payload,
             created_at=datetime.datetime.now(),

@@ -212,6 +212,14 @@ class BaseTask(luigi.Task):
         for task_dumper in data_generator:
             # get payload from data generator
             for plugin in self.plugins:
+                if not plugin.argconfig.contains("requires"):
+                    # configuration of plugin is missing
+                    raise BaseException(
+                        f"The plugin '{plugin.metadata.name}' "
+                        f"did not specify 'requires' in the 'kwargs' "
+                        f"section of its configuration"
+                    )
+
                 # get required plugins
                 required_plugins = set(
                     map(str.strip, plugin.argconfig["requires"].split(","))

@@ -3,4 +3,5 @@ site_url: https://example.com/
 nav:
     - Home: index.md
     - About: about.md
+    - Background: background.md
 theme: readthedocs

@@ -9,7 +9,10 @@ load_dotenv()
 
 # base config directory
 CONFIG_DIR = Path(
-    os.getenv("GEAR_CONFIG_DIRECTORY", "~/.config/gear/")
+    os.getenv(
+        "GEAR_CONFIG_DIRECTORY",
+        "~/.config/gear/"
+    )
 ).expanduser()
 
 

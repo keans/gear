@@ -29,6 +29,17 @@ class ArgConfig:
         """
         return self.dict.get(key, None)
 
+    def contains(self, key: str) -> bool:
+        """
+        returns True, if configuration conatins given key
+
+        :param key: key to be queried
+        :type key: str
+        :return: True, if key is in configuration
+        :rtype: bool
+        """
+        return (key in self.dict)
+
     @property
     def dict(self) -> dict:
         """
