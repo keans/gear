@@ -60,10 +60,12 @@ class ReportPlugin(TemplateMixin, BasePlugin):
             f"{self.__class__.__name__}"
         )
 
+        # ensure that parent templates/ directory is existing
+        self.template_dir.parent.mkdir(exist_ok=True)
+
         if not self.template_dir.is_dir():
             # template directory of configuration for plugin
             # is not existing yet => copy default from plugin
-            self.template_dir.mkdir()
 
             # get data directory from plugin directory
             data_dir = self.directory.joinpath("data/")
