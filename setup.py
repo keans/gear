@@ -34,6 +34,7 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
     ],
     python_requires=">=3.6",
     keywords="gear",
@@ -43,7 +44,8 @@ setup(
     install_requires=[
         "pyyaml", "cerberus", "python-dotenv", "click",
         "pandas", "dpkt", "xlrd", "openpyxl", "luigi",
-        "python-powerstrip", "jinja2", "transitions"
+        "python-powerstrip", "jinja2", "transitions",
+        "nested-dict"
     ],
     extra_require={
         "docs": ["mkdocs"],

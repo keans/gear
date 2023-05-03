@@ -3,7 +3,7 @@ from pathlib import Path
 
 import jinja2
 
-from gear.utils.typing import PathOrString
+from gear.utils.customtyping import PathOrString
 from gear.utils.utils import ensure_path
 
 

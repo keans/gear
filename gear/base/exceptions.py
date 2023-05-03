@@ -14,3 +14,9 @@ class TemplateMixinException(Exception):
     """
     template mixin exception
     """
+
+
+class RequiresException(Exception):
+    """
+    requires exception
+    """

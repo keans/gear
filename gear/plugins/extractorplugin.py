@@ -1,6 +1,5 @@
 
 from gear.base.baseplugin import BasePlugin
-from gear.utils.typing import PathOrString
 
 
 class ExtractorPlugin(BasePlugin):

@@ -4,7 +4,7 @@ from pathlib import Path
 
 from gear.base.basefiletype import BaseFileType
 from gear.base.baseplugin import BasePlugin
-from gear.utils.typing import PathOrString
+from gear.utils.customtyping import PathOrString
 from gear.utils.utils import ensure_path
 
 
@@ -24,7 +24,11 @@ class ReaderPlugin(BasePlugin, BaseFileType):
     """
     GLOBS = [".*"]
 
-    def __init__(self, schema: dict = {}, is_binary: bool = False):
+    def __init__(
+        self,
+        schema: dict = {},
+        is_binary: bool = False,
+    ):
         BasePlugin.__init__(self, schema)
         BaseFileType.__init__(self, {}, filename=None, is_binary=is_binary)
 

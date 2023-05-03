@@ -1,6 +1,4 @@
-import datetime
 import hashlib
-import json
 from pathlib import Path
 from typing import Any, Generator
 from gear.base.mixins.templatemixin import TemplateMixin
@@ -172,7 +170,9 @@ class BaseTask(luigi.Task):
                     if plugin_name not in self.available_plugin_classes:
                         # unknown plugin in config, but not installed
                         raise BaseTaskException(
-                            f"Unknown plugin '{plugin_name}'!"
+                            f"Unknown plugin '{plugin_name}'! Please "
+                            f"check if it is correctly installed or if "
+                            f"there is a typo in the config name."
                         )
 
                     # create extractor plugin instance

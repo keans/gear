@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from gear.utils.typing import PathOrString
+from gear.utils.customtyping import PathOrString
 from gear.utils.utils import ensure_path
 
 

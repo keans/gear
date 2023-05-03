@@ -1,6 +1,6 @@
 import luigi
 
-from gear.utils.typing import PathOrString
+from gear.utils.customtyping import PathOrString
 from gear.tasks.reporttask import ReportTask
 from gear.base.basetask import BaseTask
 from gear.tasks.taskexceptions import ReportAggregatorTaskException

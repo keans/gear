@@ -2,7 +2,7 @@ from pathlib import Path
 
 from luigi import Parameter
 
-from gear.utils.typing import PathOrString
+from gear.utils.customtyping import PathOrString
 from gear.utils.utils import ensure_path
 
 

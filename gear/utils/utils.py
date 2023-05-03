@@ -5,7 +5,7 @@ import importlib
 from pathlib import Path
 from typing import Any
 
-from gear.utils.typing import PathOrString
+from gear.utils.customtyping import PathOrString
 
 
 def ensure_path(

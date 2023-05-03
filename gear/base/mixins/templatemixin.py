@@ -1,7 +1,7 @@
 import logging
 from pathlib import Path
 
-from gear.utils.typing import PathOrString
+from gear.utils.customtyping import PathOrString
 from gear.utils.render import render
 from gear.utils.utils import ensure_path
 from gear.base.exceptions import TemplateMixinException

@@ -6,8 +6,8 @@ import shutil
 import click
 import luigi
 
-from gear.utils.config import CONFIG_DIR, OUTPUT_DIR, PLUGIN_DIR
-from gear.evaluator.evaluatorconfigmanager import EvaluatorConfigManager
+from gear.utils.config import CONFIG_DIR, OUTPUT_DIR, PLUGIN_DIR, DATA_DIR, \
+    PLUGIN_REPOSITORY_DIR
 from gear.utils.utils import guess_filename, get_user
 from gear.utils.directorymanager import DirectoryManager
 from gear.tasks.starttask import StartTask
@@ -97,3 +97,15 @@ def reset(configname: str):
 
     except FileNotFoundError as e:
         raise click.ClickException(e)
+
+
+@cli.command()
+def dumpenv():
+    """
+    print the current config of the environment variables
+    """
+    click.echo(f"CONFIG_DIR='{CONFIG_DIR}'")
+    click.echo(f"DATA_DIR='{DATA_DIR}'")
+    click.echo(f"OUTPUT_DIR='{OUTPUT_DIR}'")
+    click.echo(f"PLUGIN_DIR='{PLUGIN_DIR}'")
+    click.echo(f"PLUGIN_REPOSITORY_DIR={PLUGIN_REPOSITORY_DIR}")

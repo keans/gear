@@ -4,14 +4,11 @@ import datetime
 import getpass
 from gear.utils.directorymanager import DirectoryManager
 
-import luigi
-
 from gear.tasks.taskexceptions import ReportAggregatorTaskException
 from gear.base.baseplugin import BasePlugin
 from gear.base.mixins.templatemixin import TemplateMixin
-from gear.utils.typing import PathOrString
+from gear.utils.customtyping import PathOrString
 from gear.utils.config import OUTPUT_DIR, CONFIG_DIR
-from gear.utils.render import render
 
 
 # default report aggregator plugin schema
@@ -34,7 +31,7 @@ class ReportAggregatorPlugin(TemplateMixin, BasePlugin):
     """
     def __init__(
         self,
-        schema : dict = default_report_aggregator_plugin_schema
+       schema: dict = default_report_aggregator_plugin_schema
     ):
         BasePlugin.__init__(self, schema)
         TemplateMixin.__init__(self)
@@ -89,14 +86,15 @@ class ReportAggregatorPlugin(TemplateMixin, BasePlugin):
                 self.directory_manager.report_theme_directory
             )
 
-            # move base.html to template directory
             try:
+                 # move base.html to template directory
                 shutil.move(
                     self.directory_manager.report_theme_directory.joinpath(
                         "base.html"
                     ),
                     self.directory_manager.templates_directory.as_posix()
                 )
+
             except shutil.Error as e:
                 # file exists already
                 self.log.warning(e)
@@ -114,6 +112,8 @@ class ReportAggregatorPlugin(TemplateMixin, BasePlugin):
         :param payload: payload information
         :type payload: dict
         """
+        BasePlugin.apply(self, header, payload)
+
         self._res[self.template_filename_without_path] = self.render(
             template_filename=self.template_filename_without_path,
             header=header,

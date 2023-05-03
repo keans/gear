@@ -2,12 +2,11 @@ import inspect
 import logging
 from pathlib import Path
 from typing import Any
-from gear.utils.typing import PathOrString
 
 from powerstrip import Plugin, PluginManager
 
+from gear.base.exceptions import RequiresException
 from gear.base.argconfig.argconfig import ArgConfig
-from gear.utils.utils import ensure_path
 
 
 class BasePlugin(Plugin):
@@ -92,3 +91,23 @@ class BasePlugin(Plugin):
 
     def shutdown(self):
         pass
+
+    def apply(
+        self,
+        header: dict,
+        payload: dict
+    ):
+        requires = self.argconfig["requires"]
+
+        if (requires is not None):
+            # has requirements => check for missing
+            missing_requires = [
+                require
+                for require in map(str.strip, requires.split(","))
+                if require not in payload
+            ]
+            if len(missing_requires) > 0:
+                # missing plugins found that are not in payload
+                raise RequiresException(
+                    f"{self.__class__.__name__} requires in payload the"
+                    f"following plugins: {', '.join(missing_requires)} !"

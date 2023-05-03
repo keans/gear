@@ -3,7 +3,7 @@ from pathlib import Path
 
 from gear.base.baseplugin import BasePlugin
 from gear.base.mixins.templatemixin import TemplateMixin
-from gear.utils.typing import PathOrString
+from gear.utils.customtyping import PathOrString
 
 
 # default report plugin schema
@@ -43,10 +43,13 @@ class ReportPlugin(TemplateMixin, BasePlugin):
         :param payload: payload information
         :type payload: dict
         """
+        BasePlugin.apply(self, header, payload)
+
         self._res[self.template_filename_without_path] = self.render(
             template_filename=self.template_filename_without_path,
             header=header,
-            payload=payload
+            payload=payload,
+            requires=self.argconfig["requires"]
         )
 
     def init(

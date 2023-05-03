@@ -3,7 +3,7 @@ from typing import Any
 
 import luigi
 
-from gear.utils.typing import PathOrString
+from gear.utils.customtyping import PathOrString
 from gear.utils.config import OUTPUT_DIR, PLUGIN_DIR
 from gear.base.basetask import BaseTask
 from gear.tasks.transformertask import TransformerTask
